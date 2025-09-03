@@ -264,6 +264,22 @@
             font-size: 0.9em;
         }
 
+        .alcohol-cost-section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .cost-breakdown {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
         @media (max-width: 768px) {
             .input-group, .cost-comparison, .package-options {
                 grid-template-columns: 1fr;
@@ -404,16 +420,25 @@
             <!-- Results -->
             <div class="results" id="results">
                 <h2>💰 Cost Analysis</h2>
-                <div class="cost-comparison">
+                <div class="cost-comparison" id="cost-comparison">
                     <div class="cost-box">
-                        <div class="cost-label">Package Cost (Total)</div>
+                        <div class="cost-label" id="package-cost-label">Package Cost (Total)</div>
                         <div class="cost-value" id="package-total">$1,302</div>
                     </div>
                     <div class="cost-box">
-                        <div class="cost-label">Pay-as-You-Go Cost (with 18% gratuity)</div>
+                        <div class="cost-label" id="paygo-cost-label">Pay-as-You-Go Cost (with 18% gratuity)</div>
                         <div class="cost-value" id="paygo-total">$1,680</div>
                     </div>
                 </div>
+                
+                <!-- Additional alcohol costs for refreshment package -->
+                <div id="alcohol-cost-section" class="alcohol-cost-section" style="display: none;">
+                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">+ Additional Alcohol Costs (Not Covered)</div>
+                    <div style="font-size: 1.8em; font-weight: bold;" id="alcohol-cost">$0</div>
+                </div>
+                
+                <div id="cost-breakdown" class="cost-breakdown"></div>
+                
                 <div class="savings" id="savings">You save $378 with the package!</div>
                 <div class="recommendation recommend-yes" id="recommendation">
                     ✅ The beverage package is worth it for you!
@@ -450,25 +475,91 @@
             const passengers = parseInt(document.getElementById('passengers').value) || 2;
             const packagePrice = parseFloat(document.getElementById('packagePrice').value) || 79;
             const portDays = parseInt(document.getElementById('portDays').value) || 3;
+            const selectedPackage = document.querySelector('.package-option.selected').dataset.package;
 
-            // Calculate daily drink cost
-            let dailyDrinkCost = 0;
-            for (const [type, count] of Object.entries(drinkCounts)) {
-                dailyDrinkCost += count * drinkPrices[type];
-            }
-
-            // Reduce consumption on port days (assuming 50% less drinking)
             const seaDays = cruiseLength - portDays;
-            const totalDrinkCost = (seaDays * dailyDrinkCost + portDays * dailyDrinkCost * 0.5) * passengers;
+
+            // Calculate daily costs by category
+            const dailyAlcoholCost = (drinkCounts.cocktails * drinkPrices.cocktails) + 
+                                   (drinkCounts.wine * drinkPrices.wine) + 
+                                   (drinkCounts.beer * drinkPrices.beer);
+            
+            const dailyNonAlcoholCost = (drinkCounts.coffee * drinkPrices.coffee) + 
+                                       (drinkCounts.soda * drinkPrices.soda);
+
+            // Calculate total costs with port day reduction and gratuity
+            const totalAlcoholCost = (seaDays * dailyAlcoholCost + portDays * dailyAlcoholCost * 0.5) * passengers * 1.18;
+            const totalNonAlcoholCost = (seaDays * dailyNonAlcoholCost + portDays * dailyNonAlcoholCost * 0.5) * passengers * 1.18;
 
             // Package cost (including 18% gratuity)
             const packageTotal = packagePrice * cruiseLength * passengers * 1.18;
 
-            // Update display
-            document.getElementById('package-total').textContent = `$${Math.round(packageTotal).toLocaleString()}`;
-            document.getElementById('paygo-total').textContent = `$${Math.round(totalDrinkCost).toLocaleString()}`;
+            if (selectedPackage === 'deluxe') {
+                // Deluxe covers ALL drinks
+                const finalPackageCost = packageTotal;
+                const finalPayAsYouGoCost = totalAlcoholCost + totalNonAlcoholCost;
+                
+                updateDeluxeDisplay(finalPackageCost, finalPayAsYouGoCost);
+                calculateSavings(finalPayAsYouGoCost, finalPackageCost);
+                
+            } else {
+                // Refreshment ONLY covers coffee and sodas
+                const packageCostForCoveredDrinks = packageTotal;
+                const payAsYouGoCostForCoveredDrinks = totalNonAlcoholCost;
+                
+                updateRefreshmentDisplay(packageCostForCoveredDrinks, payAsYouGoCostForCoveredDrinks, totalAlcoholCost);
+                calculateSavings(payAsYouGoCostForCoveredDrinks, packageCostForCoveredDrinks, totalAlcoholCost);
+            }
+        }
 
-            const savings = totalDrinkCost - packageTotal;
+        function updateDeluxeDisplay(packageCost, payAsYouGoCost) {
+            document.getElementById('package-cost-label').textContent = 'Deluxe Package Cost';
+            document.getElementById('paygo-cost-label').textContent = 'Pay-as-You-Go Cost (with 18% gratuity)';
+            document.getElementById('package-total').textContent = `$${Math.round(packageCost).toLocaleString()}`;
+            document.getElementById('paygo-total').textContent = `$${Math.round(payAsYouGoCost).toLocaleString()}`;
+            
+            // Hide alcohol section and breakdown for deluxe
+            document.getElementById('alcohol-cost-section').style.display = 'none';
+            document.getElementById('cost-breakdown').innerHTML = '';
+        }
+
+        function updateRefreshmentDisplay(packageCost, payAsYouGoCost, alcoholCost) {
+            document.getElementById('package-cost-label').textContent = 'Refreshment Package (Coffee & Sodas Only)';
+            document.getElementById('paygo-cost-label').textContent = 'Coffee & Sodas Pay-as-You-Go';
+            document.getElementById('package-total').textContent = `$${Math.round(packageCost).toLocaleString()}`;
+            document.getElementById('paygo-total').textContent = `$${Math.round(payAsYouGoCost).toLocaleString()}`;
+            
+            // Show alcohol costs as separate line item
+            if (alcoholCost > 0) {
+                document.getElementById('alcohol-cost-section').style.display = 'block';
+                document.getElementById('alcohol-cost').textContent = `$${Math.round(alcoholCost).toLocaleString()}`;
+            } else {
+                document.getElementById('alcohol-cost-section').style.display = 'none';
+            }
+            
+            // Update breakdown with clear warning
+            let breakdown = `<strong>Important:</strong><br>`;
+            if (payAsYouGoCost === 0 && alcoholCost > 0) {
+                breakdown += `• You drink NO coffee or sodas (what the package covers)<br>`;
+                breakdown += `• You ONLY drink alcohol (not covered by Refreshment Package)<br>`;
+                breakdown += `• <strong style="color: #dc3545;">You'd pay $${Math.round(packageCost).toLocaleString()} for a package covering NONE of your drinks!</strong><br>`;
+            } else {
+                breakdown += `• Refreshment Package covers ONLY coffee and sodas<br>`;
+                if (alcoholCost > 0) {
+                    breakdown += `• All alcohol must be purchased separately at full price<br>`;
+                }
+            }
+            breakdown += `• <strong>Your true total with package: $${Math.round(packageCost + alcoholCost).toLocaleString()}</strong><br>`;
+            breakdown += `• <strong>Your total pay-as-you-go: $${Math.round(payAsYouGoCost + alcoholCost).toLocaleString()}</strong>`;
+            
+            document.getElementById('cost-breakdown').innerHTML = breakdown;
+        }
+
+        function calculateSavings(payAsYouGoCost, packageCost, alcoholCost = 0) {
+            const totalWithPackage = packageCost + alcoholCost;
+            const totalPayAsYouGo = payAsYouGoCost + alcoholCost;
+            const savings = totalPayAsYouGo - totalWithPackage;
+            
             const savingsElement = document.getElementById('savings');
             const recommendationElement = document.getElementById('recommendation');
 
@@ -483,19 +574,6 @@
                 savingsElement.style.background = 'rgba(220, 53, 69, 0.3)';
                 recommendationElement.textContent = '❌ Skip the package and pay as you go!';
                 recommendationElement.className = 'recommendation recommend-no';
-            }
-        }
-
-        function updatePackageCostLabel(selectedPackage, packageTotal, alcoholNotCoveredCost) {
-            const packageCostLabel = document.getElementById('package-cost-label');
-            const packageBreakdown = document.getElementById('package-breakdown');
-            
-            if (selectedPackage === 'refreshment' && alcoholNotCoveredCost > 0) {
-                packageCostLabel.textContent = 'Package + Alcohol Cost';
-                packageBreakdown.textContent = `Package: ${Math.round(packageTotal).toLocaleString()} + Alcohol: ${Math.round(alcoholNotCoveredCost).toLocaleString()}`;
-            } else {
-                packageCostLabel.textContent = 'Package Cost (Total)';
-                packageBreakdown.textContent = '';
             }
         }
 
@@ -514,8 +592,7 @@
                     packagePriceInput.value = 40;
                 }
                 
-                // Force immediate recalculation
-                setTimeout(() => calculateCosts(), 100);
+                calculateCosts();
             });
         });
 
