@@ -419,14 +419,14 @@
 
             <!-- Results -->
             <div class="results" id="results">
-                <h2>💰 Cost Analysis</h2>
+                <h2>💰 Cost Analysis (Total for Your Cabin)</h2>
                 <div class="cost-comparison" id="cost-comparison">
                     <div class="cost-box">
-                        <div class="cost-label" id="package-cost-label">Package Cost (Total)</div>
+                        <div class="cost-label" id="package-cost-label">Package Cost</div>
                         <div class="cost-value" id="package-total">$1,302</div>
                     </div>
                     <div class="cost-box">
-                        <div class="cost-label" id="paygo-cost-label">Pay-as-You-Go Cost (with 18% gratuity)</div>
+                        <div class="cost-label" id="paygo-cost-label">Pay-as-You-Go Cost</div>
                         <div class="cost-value" id="paygo-total">$1,680</div>
                     </div>
                 </div>
@@ -514,7 +514,7 @@
 
         function updateDeluxeDisplay(packageCost, payAsYouGoCost) {
             document.getElementById('package-cost-label').textContent = 'Deluxe Package Cost';
-            document.getElementById('paygo-cost-label').textContent = 'Pay-as-You-Go Cost (with 18% gratuity)';
+            document.getElementById('paygo-cost-label').textContent = 'Pay-as-You-Go Cost';
             document.getElementById('package-total').textContent = `$${Math.round(packageCost).toLocaleString()}`;
             document.getElementById('paygo-total').textContent = `$${Math.round(payAsYouGoCost).toLocaleString()}`;
             
@@ -525,14 +525,14 @@
 
         function updateRefreshmentDisplay(packageCost, payAsYouGoCost, alcoholCost) {
             document.getElementById('package-cost-label').textContent = 'Refreshment Package (Coffee & Sodas Only)';
-            document.getElementById('paygo-cost-label').textContent = 'Coffee & Sodas Pay-as-You-Go (Total for Cabin)';
-            document.getElementById('package-total').textContent = `${Math.round(packageCost).toLocaleString()}`;
-            document.getElementById('paygo-total').textContent = `${Math.round(payAsYouGoCost).toLocaleString()}`;
+            document.getElementById('paygo-cost-label').textContent = 'Coffee & Sodas Pay-as-You-Go';
+            document.getElementById('package-total').textContent = `$${Math.round(packageCost).toLocaleString()}`;
+            document.getElementById('paygo-total').textContent = `$${Math.round(payAsYouGoCost).toLocaleString()}`;
             
             // Show alcohol costs as separate line item
             if (alcoholCost > 0) {
                 document.getElementById('alcohol-cost-section').style.display = 'block';
-                document.getElementById('alcohol-cost').textContent = `${Math.round(alcoholCost).toLocaleString()}`;
+                document.getElementById('alcohol-cost').textContent = `$${Math.round(alcoholCost).toLocaleString()}`;
             } else {
                 document.getElementById('alcohol-cost-section').style.display = 'none';
             }
@@ -542,15 +542,15 @@
             if (payAsYouGoCost === 0 && alcoholCost > 0) {
                 breakdown += `• You drink NO coffee or sodas (what the package covers)<br>`;
                 breakdown += `• You ONLY drink alcohol (not covered by Refreshment Package)<br>`;
-                breakdown += `• <strong style="color: #ffffff; background: #dc3545; padding: 2px 6px; border-radius: 4px;">You'd pay ${Math.round(packageCost).toLocaleString()} for a package covering NONE of your drinks!</strong><br>`;
+                breakdown += `• <strong style="color: #ffffff; background: #dc3545; padding: 2px 6px; border-radius: 4px;">You'd pay $${Math.round(packageCost).toLocaleString()} for a package covering NONE of your drinks!</strong><br>`;
             } else {
                 breakdown += `• Refreshment Package covers ONLY coffee and sodas<br>`;
                 if (alcoholCost > 0) {
                     breakdown += `• All alcohol must be purchased separately at full price<br>`;
                 }
             }
-            breakdown += `• <strong>Your cabin's total with package: ${Math.round(packageCost + alcoholCost).toLocaleString()}</strong><br>`;
-            breakdown += `• <strong>Your cabin's total pay-as-you-go: ${Math.round(payAsYouGoCost + alcoholCost).toLocaleString()}</strong>`;
+            breakdown += `• <strong>Total with package: $${Math.round(packageCost + alcoholCost).toLocaleString()}</strong><br>`;
+            breakdown += `• <strong>Total pay-as-you-go: $${Math.round(payAsYouGoCost + alcoholCost).toLocaleString()}</strong>`;
             
             document.getElementById('cost-breakdown').innerHTML = breakdown;
         }
