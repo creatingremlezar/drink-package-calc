@@ -200,6 +200,13 @@
             font-weight: bold;
         }
 
+        .cost-breakdown {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
         .savings {
             font-size: 1.5em;
             font-weight: bold;
@@ -287,7 +294,6 @@
         </div>
         
         <div class="content">
-            <!-- Cruise Details -->
             <div class="calculator-section">
                 <h2 class="section-title">⚓ Cruise Details</h2>
                 <div class="input-group">
@@ -302,7 +308,6 @@
                 </div>
             </div>
 
-            <!-- Package Selection -->
             <div class="calculator-section">
                 <h2 class="section-title">📦 Beverage Package Pricing</h2>
                 <div class="package-options">
@@ -330,10 +335,9 @@
                 </p>
             </div>
 
-            <!-- Daily Consumption -->
             <div class="calculator-section">
                 <h2 class="section-title">🍸 Your Daily Drinking Habits</h2>
-                <p style="margin-bottom: 20px; color: #666;">Adjust the sliders based on your typical consumption per day:</p>
+                <p style="margin-bottom: 20px; color: #666;">Adjust the counters based on your typical consumption per day:</p>
                 
                 <div class="drink-counter">
                     <div class="drink-icon">🍸</div>
@@ -401,13 +405,13 @@
                 </div>
             </div>
 
-            <!-- Results -->
             <div class="results" id="results">
                 <h2>💰 Cost Analysis</h2>
                 <div class="cost-comparison">
                     <div class="cost-box">
-                        <div class="cost-label">Package Cost (Total)</div>
+                        <div class="cost-label" id="package-cost-label">Package Cost (Total)</div>
                         <div class="cost-value" id="package-total">$1,302</div>
+                        <div class="cost-breakdown" id="package-breakdown"></div>
                     </div>
                     <div class="cost-box">
                         <div class="cost-label">Pay-as-You-Go Cost (with 18% gratuity)</div>
@@ -444,38 +448,82 @@
             document.getElementById(`${type}-count`).textContent = drinkCounts[type];
             calculateCosts();
         }
-
+        
+        // --- REVISED calculateCosts FUNCTION ---
         function calculateCosts() {
+            // Get all user inputs
             const cruiseLength = parseInt(document.getElementById('cruiseLength').value) || 7;
             const passengers = parseInt(document.getElementById('passengers').value) || 2;
             const packagePrice = parseFloat(document.getElementById('packagePrice').value) || 79;
             const portDays = parseInt(document.getElementById('portDays').value) || 3;
+            const seaDays = cruiseLength - portDays;
+            
+            // Determine which package is selected
+            const selectedPackage = document.querySelector('.package-option.selected').dataset.package;
+            const GRATUITY_RATE = 1.18;
 
-            // Calculate daily drink cost
-            let dailyDrinkCost = 0;
-            for (const [type, count] of Object.entries(drinkCounts)) {
-                dailyDrinkCost += count * drinkPrices[type];
+            // Define which drinks belong to which category
+            const alcoholicDrinks = ['cocktails', 'wine', 'beer'];
+            const nonAlcoholicDrinks = ['coffee', 'soda'];
+            
+            // Calculate daily costs for different categories based on consumption
+            let dailyAlcoholCost = 0;
+            alcoholicDrinks.forEach(type => {
+                dailyAlcoholCost += drinkCounts[type] * drinkPrices[type];
+            });
+
+            let dailyNonAlcoholCost = 0;
+            nonAlcoholicDrinks.forEach(type => {
+                dailyNonAlcoholCost += drinkCounts[type] * drinkPrices[type];
+            });
+
+            // Calculate total a la carte costs for the entire cruise (assuming 50% consumption on port days)
+            const totalAlcoholCostPayGo = (seaDays * dailyAlcoholCost + portDays * dailyAlcoholCost * 0.5) * passengers;
+            const totalNonAlcoholCostPayGo = (seaDays * dailyNonAlcoholCost + portDays * dailyNonAlcoholCost * 0.5) * passengers;
+            
+            // This is the total cost if you paid for every single drink individually
+            const paygoTotal = (totalAlcoholCostPayGo + totalNonAlcoholCostPayGo) * GRATUITY_RATE;
+            
+            // This is the base cost of just the drink package itself
+            const basePackageCost = packagePrice * cruiseLength * passengers * GRATUITY_RATE;
+            
+            let packageComparisonCost;
+            const packageCostLabelEl = document.getElementById('package-cost-label');
+            const packageBreakdownEl = document.getElementById('package-breakdown');
+
+            if (selectedPackage === 'deluxe') {
+                // The Deluxe package covers everything, so the comparison cost is just the package price.
+                packageComparisonCost = basePackageCost;
+                packageCostLabelEl.textContent = 'Package Cost (Total)';
+                packageBreakdownEl.innerHTML = ''; // Clear any previous breakdown text
+            } else { // 'refreshment' package
+                // The Refreshment package only covers non-alcoholic drinks.
+                // You must still pay for all alcoholic drinks a la carte.
+                const alcoholNotCoveredCost = totalAlcoholCostPayGo * GRATUITY_RATE;
+                packageComparisonCost = basePackageCost + alcoholNotCoveredCost;
+                
+                // Update the UI to show the user this combined cost
+                packageCostLabelEl.textContent = 'Package + A La Carte Alcohol';
+                if (alcoholNotCoveredCost > 0) {
+                     packageBreakdownEl.innerHTML = `Package: $${Math.round(basePackageCost).toLocaleString()}<br>+ Alcohol: $${Math.round(alcoholNotCoveredCost).toLocaleString()}`;
+                } else {
+                    packageBreakdownEl.innerHTML = '';
+                }
             }
 
-            // Reduce consumption on port days (assuming 50% less drinking)
-            const seaDays = cruiseLength - portDays;
-            const totalDrinkCost = (seaDays * dailyDrinkCost + portDays * dailyDrinkCost * 0.5) * passengers;
-
-            // Package cost (including 18% gratuity)
-            const packageTotal = packagePrice * cruiseLength * passengers * 1.18;
-
-            // Update display
-            document.getElementById('package-total').textContent = `$${Math.round(packageTotal).toLocaleString()}`;
-            document.getElementById('paygo-total').textContent = `$${Math.round(totalDrinkCost).toLocaleString()}`;
-
-            const savings = totalDrinkCost - packageTotal;
+            // Update the main display values
+            document.getElementById('package-total').textContent = `$${Math.round(packageComparisonCost).toLocaleString()}`;
+            document.getElementById('paygo-total').textContent = `$${Math.round(paygoTotal).toLocaleString()}`;
+            
+            // The final savings is the difference between paying for everything individually vs. your chosen package scenario
+            const savings = paygoTotal - packageComparisonCost;
             const savingsElement = document.getElementById('savings');
             const recommendationElement = document.getElementById('recommendation');
 
             if (savings > 0) {
-                savingsElement.textContent = `You save $${Math.round(savings).toLocaleString()} with the package!`;
+                savingsElement.textContent = `You save $${Math.round(savings).toLocaleString()}!`;
                 savingsElement.style.background = 'rgba(40, 167, 69, 0.3)';
-                recommendationElement.textContent = '✅ The beverage package is worth it for you!';
+                recommendationElement.textContent = `✅ The ${selectedPackage} package is worth it for you!`;
                 recommendationElement.className = 'recommendation recommend-yes';
             } else {
                 const loss = Math.abs(savings);
@@ -495,6 +543,7 @@
                 const packageType = this.dataset.package;
                 const packagePriceInput = document.getElementById('packagePrice');
                 
+                // Set default prices when switching packages for convenience
                 if (packageType === 'deluxe') {
                     packagePriceInput.value = 79;
                 } else if (packageType === 'refreshment') {
@@ -511,8 +560,8 @@
         document.getElementById('packagePrice').addEventListener('input', calculateCosts);
         document.getElementById('portDays').addEventListener('input', calculateCosts);
 
-        // Initial calculation
-        calculateCosts();
+        // Initial calculation on page load
+        window.addEventListener('load', calculateCosts);
     </script>
 </body>
 </html>
