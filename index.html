@@ -348,8 +348,8 @@
 
             <!-- Daily Consumption -->
             <div class="calculator-section">
-                <h2 class="section-title">🍸 Your Daily Drinking Habits</h2>
-                <p style="margin-bottom: 20px; color: #666;">Adjust the sliders based on your typical consumption per day:</p>
+                <h2 class="section-title">🍸 Daily Drinking Habits (Per Person)</h2>
+                <p style="margin-bottom: 20px; color: #666;">Adjust based on <strong>average consumption per person</strong> in your cabin per day:</p>
                 
                 <div class="drink-counter">
                     <div class="drink-icon">🍸</div>
@@ -359,7 +359,7 @@
                     </div>
                     <div class="counter-controls">
                         <button class="counter-btn" onclick="updateDrink('cocktails', -1)">-</button>
-                        <span class="counter-value" id="cocktails-count">3</span>
+                        <span class="counter-value" id="cocktails-count">2</span>
                         <button class="counter-btn" onclick="updateDrink('cocktails', 1)">+</button>
                     </div>
                 </div>
@@ -372,7 +372,7 @@
                     </div>
                     <div class="counter-controls">
                         <button class="counter-btn" onclick="updateDrink('wine', -1)">-</button>
-                        <span class="counter-value" id="wine-count">2</span>
+                        <span class="counter-value" id="wine-count">1</span>
                         <button class="counter-btn" onclick="updateDrink('wine', 1)">+</button>
                     </div>
                 </div>
@@ -385,7 +385,7 @@
                     </div>
                     <div class="counter-controls">
                         <button class="counter-btn" onclick="updateDrink('beer', -1)">-</button>
-                        <span class="counter-value" id="beer-count">2</span>
+                        <span class="counter-value" id="beer-count">1</span>
                         <button class="counter-btn" onclick="updateDrink('beer', 1)">+</button>
                     </div>
                 </div>
@@ -398,7 +398,7 @@
                     </div>
                     <div class="counter-controls">
                         <button class="counter-btn" onclick="updateDrink('coffee', -1)">-</button>
-                        <span class="counter-value" id="coffee-count">2</span>
+                        <span class="counter-value" id="coffee-count">1</span>
                         <button class="counter-btn" onclick="updateDrink('coffee', 1)">+</button>
                     </div>
                 </div>
@@ -411,7 +411,7 @@
                     </div>
                     <div class="counter-controls">
                         <button class="counter-btn" onclick="updateDrink('soda', -1)">-</button>
-                        <span class="counter-value" id="soda-count">3</span>
+                        <span class="counter-value" id="soda-count">2</span>
                         <button class="counter-btn" onclick="updateDrink('soda', 1)">+</button>
                     </div>
                 </div>
@@ -449,11 +449,11 @@
 
     <script>
         const drinkCounts = {
-            cocktails: 3,
-            wine: 2,
-            beer: 2,
-            coffee: 2,
-            soda: 3
+            cocktails: 2,
+            wine: 1,
+            beer: 1,
+            coffee: 1,
+            soda: 2
         };
 
         const drinkPrices = {
@@ -479,17 +479,17 @@
 
             const seaDays = cruiseLength - portDays;
 
-            // Calculate daily costs by category
-            const dailyAlcoholCost = (drinkCounts.cocktails * drinkPrices.cocktails) + 
-                                   (drinkCounts.wine * drinkPrices.wine) + 
-                                   (drinkCounts.beer * drinkPrices.beer);
+            // Calculate daily costs by category PER PERSON
+            const dailyAlcoholCostPerPerson = (drinkCounts.cocktails * drinkPrices.cocktails) + 
+                                            (drinkCounts.wine * drinkPrices.wine) + 
+                                            (drinkCounts.beer * drinkPrices.beer);
             
-            const dailyNonAlcoholCost = (drinkCounts.coffee * drinkPrices.coffee) + 
-                                       (drinkCounts.soda * drinkPrices.soda);
+            const dailyNonAlcoholCostPerPerson = (drinkCounts.coffee * drinkPrices.coffee) + 
+                                                (drinkCounts.soda * drinkPrices.soda);
 
-            // Calculate total costs with port day reduction and gratuity
-            const totalAlcoholCost = (seaDays * dailyAlcoholCost + portDays * dailyAlcoholCost * 0.5) * passengers * 1.18;
-            const totalNonAlcoholCost = (seaDays * dailyNonAlcoholCost + portDays * dailyNonAlcoholCost * 0.5) * passengers * 1.18;
+            // Calculate total costs with port day reduction, passengers, and gratuity
+            const totalAlcoholCost = (seaDays * dailyAlcoholCostPerPerson + portDays * dailyAlcoholCostPerPerson * 0.5) * passengers * 1.18;
+            const totalNonAlcoholCost = (seaDays * dailyNonAlcoholCostPerPerson + portDays * dailyNonAlcoholCostPerPerson * 0.5) * passengers * 1.18;
 
             // Package cost (including 18% gratuity)
             const packageTotal = packagePrice * cruiseLength * passengers * 1.18;
