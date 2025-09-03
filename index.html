@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Caribbean Drinks Package Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .calculator-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-field label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .input-field input, .input-field select {
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field input:focus, .input-field select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .drink-counter {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .drink-icon {
+            font-size: 2em;
+            width: 60px;
+            text-align: center;
+        }
+
+        .drink-info {
+            flex: 1;
+        }
+
+        .drink-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .drink-price {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .counter-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #2a5298;
+            background: white;
+            color: #2a5298;
+            border-radius: 50%;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .counter-btn:hover {
+            background: #2a5298;
+            color: white;
+        }
+
+        .counter-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+            color: #1e3c72;
+        }
+
+        .results {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .results h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .cost-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .cost-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cost-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .cost-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .savings {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .recommendation {
+            font-size: 1.2em;
+            font-weight: 600;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .recommend-yes {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid rgba(40, 167, 69, 0.5);
+        }
+
+        .recommend-no {
+            background: rgba(220, 53, 69, 0.2);
+            border: 2px solid rgba(220, 53, 69, 0.5);
+        }
+
+        .package-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .package-option {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .package-option:hover {
+            border-color: #2a5298;
+            box-shadow: 0 5px 15px rgba(42, 82, 152, 0.1);
+        }
+
+        .package-option.selected {
+            border-color: #2a5298;
+            background: rgba(42, 82, 152, 0.1);
+        }
+
+        .package-name {
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+
+        .package-price {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .input-group, .cost-comparison, .package-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍹 Drinks Package Calculator</h1>
+            <p>Royal Caribbean • Find out if the beverage package is worth it for you!</p>
+        </div>
+        
+        <div class="content">
+            <!-- Cruise Details -->
+            <div class="calculator-section">
+                <h2 class="section-title">⚓ Cruise Details</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="cruiseLength">Cruise Length (nights)</label>
+                        <input type="number" id="cruiseLength" value="7" min="3" max="14">
+                    </div>
+                    <div class="input-field">
+                        <label for="passengers">Number of Passengers</label>
+                        <input type="number" id="passengers" value="2" min="1" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package Selection -->
+            <div class="calculator-section">
+                <h2 class="section-title">📦 Beverage Package Pricing</h2>
+                <div class="package-options">
+                    <div class="package-option selected" data-package="deluxe">
+                        <div class="package-name">Deluxe Beverage Package</div>
+                        <div class="package-price">Typical range: $65-89/day + 18% gratuity</div>
+                    </div>
+                    <div class="package-option" data-package="refreshment">
+                        <div class="package-name">Refreshment Package</div>
+                        <div class="package-price">Typical range: $35-45/day + 18% gratuity</div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="packagePrice">Your Exact Package Price per Day (before gratuity)</label>
+                        <input type="number" id="packagePrice" value="79" min="20" max="120" step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="portDays">Port Days (when you'll drink less)</label>
+                        <input type="number" id="portDays" value="3" min="0" max="7">
+                    </div>
+                </div>
+                <p style="color: #666; font-size: 0.9em; margin-top: 10px;">
+                    💡 Enter the exact price you see on your booking or Royal Caribbean's website. Prices vary by ship, sailing date, and advance booking discounts.
+                </p>
+            </div>
+
+            <!-- Daily Consumption -->
+            <div class="calculator-section">
+                <h2 class="section-title">🍸 Your Daily Drinking Habits</h2>
+                <p style="margin-bottom: 20px; color: #666;">Adjust the sliders based on your typical consumption per day:</p>
+                
+                <div class="drink-counter">
+                    <div class="drink-icon">🍸</div>
+                    <div class="drink-info">
+                        <div class="drink-name">Cocktails & Mixed Drinks</div>
+                        <div class="drink-price">Average: $12-16 each</div>
+                    </div>
+                    <div class="counter-controls">
+                        <button class="counter-btn" onclick="updateDrink('cocktails', -1)">-</button>
+                        <span class="counter-value" id="cocktails-count">3</span>
+                        <button class="counter-btn" onclick="updateDrink('cocktails', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="drink-counter">
+                    <div class="drink-icon">🍷</div>
+                    <div class="drink-info">
+                        <div class="drink-name">Wine by the Glass</div>
+                        <div class="drink-price">Average: $9-15 each</div>
+                    </div>
+                    <div class="counter-controls">
+                        <button class="counter-btn" onclick="updateDrink('wine', -1)">-</button>
+                        <span class="counter-value" id="wine-count">2</span>
+                        <button class="counter-btn" onclick="updateDrink('wine', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="drink-counter">
+                    <div class="drink-icon">🍺</div>
+                    <div class="drink-info">
+                        <div class="drink-name">Beer</div>
+                        <div class="drink-price">Average: $7-9 each</div>
+                    </div>
+                    <div class="counter-controls">
+                        <button class="counter-btn" onclick="updateDrink('beer', -1)">-</button>
+                        <span class="counter-value" id="beer-count">2</span>
+                        <button class="counter-btn" onclick="updateDrink('beer', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="drink-counter">
+                    <div class="drink-icon">☕</div>
+                    <div class="drink-info">
+                        <div class="drink-name">Specialty Coffee & Beverages</div>
+                        <div class="drink-price">Average: $4-7 each</div>
+                    </div>
+                    <div class="counter-controls">
+                        <button class="counter-btn" onclick="updateDrink('coffee', -1)">-</button>
+                        <span class="counter-value" id="coffee-count">2</span>
+                        <button class="counter-btn" onclick="updateDrink('coffee', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="drink-counter">
+                    <div class="drink-icon">🥤</div>
+                    <div class="drink-info">
+                        <div class="drink-name">Sodas & Juices</div>
+                        <div class="drink-price">Average: $3-4 each</div>
+                    </div>
+                    <div class="counter-controls">
+                        <button class="counter-btn" onclick="updateDrink('soda', -1)">-</button>
+                        <span class="counter-value" id="soda-count">3</span>
+                        <button class="counter-btn" onclick="updateDrink('soda', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results" id="results">
+                <h2>💰 Cost Analysis</h2>
+                <div class="cost-comparison">
+                    <div class="cost-box">
+                        <div class="cost-label">Package Cost (Total)</div>
+                        <div class="cost-value" id="package-total">$1,302</div>
+                    </div>
+                    <div class="cost-box">
+                        <div class="cost-label">Pay-as-You-Go Cost</div>
+                        <div class="cost-value" id="paygo-total">$1,680</div>
+                    </div>
+                </div>
+                <div class="savings" id="savings">You save $378 with the package!</div>
+                <div class="recommendation recommend-yes" id="recommendation">
+                    ✅ The beverage package is worth it for you!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const drinkCounts = {
+            cocktails: 3,
+            wine: 2,
+            beer: 2,
+            coffee: 2,
+            soda: 3
+        };
+
+        const drinkPrices = {
+            cocktails: 14,
+            wine: 12,
+            beer: 8,
+            coffee: 5.5,
+            soda: 3.5
+        };
+
+        function updateDrink(type, change) {
+            drinkCounts[type] = Math.max(0, drinkCounts[type] + change);
+            document.getElementById(`${type}-count`).textContent = drinkCounts[type];
+            calculateCosts();
+        }
+
+        function calculateCosts() {
+            const cruiseLength = parseInt(document.getElementById('cruiseLength').value) || 7;
+            const passengers = parseInt(document.getElementById('passengers').value) || 2;
+            const packagePrice = parseFloat(document.getElementById('packagePrice').value) || 79;
+            const portDays = parseInt(document.getElementById('portDays').value) || 3;
+
+            // Calculate daily drink cost
+            let dailyDrinkCost = 0;
+            for (const [type, count] of Object.entries(drinkCounts)) {
+                dailyDrinkCost += count * drinkPrices[type];
+            }
+
+            // Reduce consumption on port days (assuming 50% less drinking)
+            const seaDays = cruiseLength - portDays;
+            const totalDrinkCost = (seaDays * dailyDrinkCost + portDays * dailyDrinkCost * 0.5) * passengers;
+
+            // Package cost (including 18% gratuity)
+            const packageTotal = packagePrice * cruiseLength * passengers * 1.18;
+
+            // Update display
+            document.getElementById('package-total').textContent = `$${Math.round(packageTotal).toLocaleString()}`;
+            document.getElementById('paygo-total').textContent = `$${Math.round(totalDrinkCost).toLocaleString()}`;
+
+            const savings = totalDrinkCost - packageTotal;
+            const savingsElement = document.getElementById('savings');
+            const recommendationElement = document.getElementById('recommendation');
+
+            if (savings > 0) {
+                savingsElement.textContent = `You save $${Math.round(savings).toLocaleString()} with the package!`;
+                savingsElement.style.background = 'rgba(40, 167, 69, 0.3)';
+                recommendationElement.textContent = '✅ The beverage package is worth it for you!';
+                recommendationElement.className = 'recommendation recommend-yes';
+            } else {
+                const loss = Math.abs(savings);
+                savingsElement.textContent = `You'd overpay by $${Math.round(loss).toLocaleString()} with the package`;
+                savingsElement.style.background = 'rgba(220, 53, 69, 0.3)';
+                recommendationElement.textContent = '❌ Skip the package and pay as you go!';
+                recommendationElement.className = 'recommendation recommend-no';
+            }
+        }
+
+        // Package selection
+        document.querySelectorAll('.package-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.package-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const packageType = this.dataset.package;
+                const packagePriceInput = document.getElementById('packagePrice');
+                
+                if (packageType === 'deluxe') {
+                    packagePriceInput.value = 79;
+                } else if (packageType === 'refreshment') {
+                    packagePriceInput.value = 40;
+                }
+                
+                calculateCosts();
+            });
+        });
+
+        // Event listeners for input changes
+        document.getElementById('cruiseLength').addEventListener('input', calculateCosts);
+        document.getElementById('passengers').addEventListener('input', calculateCosts);
+        document.getElementById('packagePrice').addEventListener('input', calculateCosts);
+        document.getElementById('portDays').addEventListener('input', calculateCosts);
+
+        // Initial calculation
+        calculateCosts();
+    </script>
+</body>
+</html>
